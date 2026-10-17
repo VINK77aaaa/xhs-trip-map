@@ -19,7 +19,7 @@
   .group-title { font-size: 10.5px; font-weight: 600; color: #97a2b4; letter-spacing: .08em; margin-bottom: 9px; }
   .chips { display: flex; flex-wrap: wrap; gap: 5px; }
   .chip {
-    display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 20px;
+    display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; border-radius: 999px;
     border: 1px solid #e2e8f0; background: #fff; font-size: 11.5px; color: #55617a; cursor: pointer;
     user-select: none; transition: all .12s; white-space: nowrap;
   }
@@ -35,7 +35,7 @@
   .day-head { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: #33415c; margin-bottom: 7px; }
   .day-head .bar { width: 13px; height: 3px; border-radius: 2px; flex: 0 0 13px; }
   .day-head .meta { font-weight: 400; color: #a3adbd; margin-left: auto; font-size: 10.5px; }
-  .stop { display: flex; align-items: center; gap: 7px; padding: 4px 5px; border-radius: 5px; cursor: pointer; color: #33415c; }
+  .stop { display: flex; align-items: center; gap: 7px; padding: 4px 6px; border-radius: 10px; cursor: pointer; color: #33415c; transition: background .12s; }
   .stop:hover { background: #f3f7fd; }
   .stop .idx { width: 15px; height: 15px; border-radius: 50%; background: #eef1f5; color: #7c8799; font-size: 9.5px; display: flex; align-items: center; justify-content: center; flex: 0 0 15px; font-weight: 600; }
   .stop .dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 7px; }
@@ -53,7 +53,7 @@
       order: 2; width: 100%; flex: 0 0 auto;
       max-height: 56dvh;
       border-left: none; border-top: 1px solid #e8edf3;
-      border-radius: 14px 14px 0 0;
+      border-radius: 22px 22px 0 0;
       box-shadow: 0 -6px 22px rgba(20, 30, 50, .09);
       padding: 0 14px calc(16px + env(safe-area-inset-bottom));
       transition: max-height .22s ease;
@@ -64,7 +64,7 @@
       display: flex; align-items: center; justify-content: center;
       height: 38px; margin: 0 -14px 0; cursor: pointer; touch-action: manipulation;
     }
-    .sheet-handle span { width: 34px; height: 3.5px; border-radius: 2px; background: #d5dce6; }
+    .sheet-handle span { width: 40px; height: 4px; border-radius: 3px; background: #d5dce6; }
     #panel h1 { font-size: 14.5px; margin-bottom: 2px; }
     #panel .sub { font-size: 11px; margin-bottom: 9px; line-height: 1.45; }
     .group { margin-bottom: 11px; }
@@ -96,6 +96,14 @@
   #fallback th, #fallback td { border: 1px solid #e8edf3; padding: 7px 10px; text-align: left; }
   #fallback th { background: #f7f9fc; color: #6b7891; font-weight: 600; }
   .amap-info-content { font-size: 12.5px; line-height: 1.7; min-width: 170px; }
+  /* 信息窗圆润化：高德默认是直角，这里统一加大圆角与阴影 */
+  .amap-info-content.amap-info-outer,
+  .amap-info-contentContainer .amap-info-content {
+    border-radius: 16px !important;
+    box-shadow: 0 8px 26px rgba(20, 30, 50, .18);
+    padding: 13px 15px !important;
+  }
+  .amap-info-close { color: #b0b9c6 !important; font-size: 16px !important; right: 8px !important; }
   .amap-info-content .nm { font-weight: 600; font-size: 14px; margin-bottom: 4px; color: #17202f; }
   .amap-info-content .meta { color: #8b96a8; font-size: 11.5px; }
   .amap-info-content a { color: #2f6fed; text-decoration: none; }
@@ -103,15 +111,39 @@
 
   /* 「在高德地图中查看」——仅移动端渲染，故不需要媒体查询控制显隐。
      信息窗宽度按内容自适应，必须 nowrap，否则按钮会被挤成多行窄条。 */
-  .amap-info-content .amap-jump {
+  .amap-info-content .amap-jump, #poi-card .amap-jump {
     display: flex; align-items: center; justify-content: center; gap: 5px;
-    margin-top: 9px; padding: 8px 12px; border-radius: 8px;
+    margin-top: 10px; padding: 9px 14px; border-radius: 12px;
     background: #2f6fed; color: #fff !important; font-size: 13px; font-weight: 600;
     text-decoration: none !important; line-height: 1.2; white-space: nowrap;
   }
-  .amap-info-content .amap-jump:active { background: #2358c4; }
-  .amap-info-content .amap-jump svg { width: 13px; height: 13px; flex: 0 0 13px; }
-  .amap-info-content .amap-jump span { white-space: nowrap; flex: 0 0 auto; }
+  .amap-info-content .amap-jump:active, #poi-card .amap-jump:active { background: #2358c4; }
+  .amap-info-content .amap-jump svg, #poi-card .amap-jump svg { width: 13px; height: 13px; flex: 0 0 13px; }
+  .amap-info-content .amap-jump span, #poi-card .amap-jump span { white-space: nowrap; flex: 0 0 auto; }
+
+  /* ---------- 手机端地点详情卡片 ---------- */
+  #poi-card { display: none; }
+  #poi-card.on { display: block; }
+  #poi-card .pc-inner {
+    position: absolute; left: 12px; right: 12px; bottom: 12px; z-index: 600;
+    background: #fff; border-radius: 20px; padding: 15px 17px 16px;
+    box-shadow: 0 10px 34px rgba(20, 30, 50, .22), 0 2px 6px rgba(20, 30, 50, .08);
+    max-height: 62%; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    font-size: 13px; line-height: 1.65; color: #33415c;
+    animation: pcIn .18s ease-out;
+  }
+  @keyframes pcIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  #poi-card .pc-close {
+    position: absolute; top: 9px; right: 11px; width: 26px; height: 26px; border: 0;
+    border-radius: 50%; background: #f2f4f8; color: #8b96a8; font-size: 17px; line-height: 1;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+  }
+  #poi-card .pc-close:active { background: #e6eaf1; }
+  #poi-card .nm { font-size: 15.5px; font-weight: 600; color: #17202f; margin-bottom: 5px; padding-right: 30px; }
+  #poi-card .meta { color: #8b96a8; font-size: 11.5px; margin-top: 3px; }
+  #poi-card .src { margin-top: 10px; padding-top: 9px; border-top: 1px solid #eef1f5; font-size: 12px; }
+  #poi-card .src a { color: #2f6fed; text-decoration: none; }
+  #poi-card .amap-jump { margin-top: 12px; }
 </style>
 </head>
 <body>
@@ -119,6 +151,13 @@
   <div style="position:relative;flex:1;min-width:0;">
     <div id="banner" hidden></div>
     <div id="map"></div>
+    <!-- 手机端地点详情卡片：不用高德 InfoWindow，位置与圆角完全可控 -->
+    <div id="poi-card">
+      <div class="pc-inner">
+        <button class="pc-close" type="button" aria-label="关闭">&times;</button>
+        <div class="pc-body"></div>
+      </div>
+    </div>
   </div>
   <aside id="panel">
     <div class="sheet-handle" id="sheet-handle"><span></span></div>
@@ -200,14 +239,28 @@
     return touch && narrow && /Android|iPhone|iPad|iPod|HarmonyOS|Mobile/i.test(ua);
   })();
 
-  // 高德单点标注 URI。坐标为 GCJ-02，与 coordinate=gaode 对应，无需转换。
-  function amapMarkerUri(p, callnative) {
+  // 高德单点标注：网页版 URI（兜底用）。坐标为 GCJ-02，与 coordinate=gaode 对应。
+  function amapWebUri(p) {
     return 'https://uri.amap.com/marker'
       + '?position=' + p.lng + ',' + p.lat
       + '&name=' + encodeURIComponent(p.name || '')
       + '&coordinate=gaode'
       + '&src=' + encodeURIComponent('xhs-trip-map')
-      + '&callnative=' + (callnative ? 1 : 0);
+      + '&callnative=0';
+  }
+
+  // 高德 App scheme（真正能唤起 App 的形式）。
+  // 注意：uri.amap.com/marker?callnative=1 是网页地址，只会导航到网页，
+  // 唤不起 App —— 这是最初实现失效的原因。必须用 App scheme。
+  // dev=0 表示坐标已加密（GCJ-02），不需要再做国测加密。
+  function amapAppScheme(p) {
+    var ua = navigator.userAgent || '';
+    var q = '?sourceApplication=' + encodeURIComponent('xhs-trip-map')
+      + '&poiname=' + encodeURIComponent(p.name || '')
+      + '&lat=' + p.lat + '&lon=' + p.lng + '&dev=0';
+    if (/iPhone|iPad|iPod|iOS/i.test(ua)) return 'iosamap://viewMap' + q;
+    if (/Android|HarmonyOS/i.test(ua)) return 'androidamap://viewMap' + q;
+    return ''; // 桌面端不唤起
   }
 
   $('subline').textContent =
@@ -284,8 +337,48 @@
     var p = null;
     for (var i = 0; i < ALL.length; i++) { if (ALL[i].id === id) { p = ALL[i]; break; } }
     if (!p || p.lng == null || !map) return;
-    map.setZoomAndCenter(14, [p.lng, p.lat]);
-    if (infoWin) { infoWin.setContent(infoHtml(p)); infoWin.open(map, [p.lng, p.lat]); }
+    map.setZoom(14, true);
+    openInfoWindow(p, { instant: true });
+  }
+
+  // 打开地点详情。
+  // 手机端用自绘卡片（不依赖高德 InfoWindow，位置与圆角完全可控）；
+  // 桌面端仍用高德原生气泡。
+  //
+  // 定位不靠回读坐标：setCenter 之后地图不会立刻重绘，此时 lngLatToContainer
+  // 返回的仍是旧位置，据此换算会产生巨大偏移并逐次累积（实测发散到 6218px）。
+  // 因此改为解析计算：setCenter 后点必然落在容器正中，偏移量由尺寸直接算出。
+  // （方向已实测校准：把容器中线上方的点设为新中心 → 标记在屏幕上向下移动）
+  function openInfoWindow(p, opt) {
+    if (!map || p.lng == null) return;
+    opt = opt || {};
+
+    var mobile = IS_MOBILE;
+    var card = $('poi-card');
+
+    if (mobile && card) {
+      card.querySelector('.pc-body').innerHTML = poiBodyHtml(p);
+      card.classList.add('on');
+      if (infoWin) infoWin.close();
+    } else if (infoWin) {
+      infoWin.setContent(infoHtml(p));
+      infoWin.open(map, [p.lng, p.lat]);
+    }
+
+    // 标记点应处的垂直位置：手机端因卡片占据底部，点上移到 34% 处
+    var targetRatio = mobile ? 0.34 : 0.55;
+
+    function place() {
+      var size = map.getSize();
+      if (!size || !size.width || !size.height) return;
+      var targetY = Math.round(size.height * targetRatio);
+      var dy = size.height / 2 - targetY;
+      var nc = map.containerToLngLat(new AMap.Pixel(size.width / 2, size.height / 2 + dy));
+      if (nc) map.setCenter(nc, true);
+    }
+
+    if (opt.instant) { place(); setTimeout(place, 60); }
+    else { map.setCenter([p.lng, p.lat]); setTimeout(place, 120); }
   }
 
   function renderItinerary() {
@@ -366,15 +459,16 @@
     });
   }
 
-  function infoHtml(p) {
-    var h = '<div class="amap-info-content"><div class="nm">' + esc(p.name) + '</div>';
+  // 详情正文（气泡与卡片共用）
+  function poiBodyHtml(p) {
+    var h = '<div class="nm">' + esc(p.name) + '</div>';
     if (p.note) h += '<div>' + esc(p.note) + '</div>';
     var m = [];
     if (p.day) m.push('第 ' + p.day + ' 天');
     if (p.type && TYPES[p.type]) m.push(TYPES[p.type].label);
     if (m.length) h += '<div class="meta">' + m.join(' · ') + '</div>';
     if (p.sources && p.sources.length) {
-      h += '<div style="margin-top:8px;border-top:1px solid #eef1f5;padding-top:7px;">参考笔记：<br>';
+      h += '<div class="src">参考笔记：<br>';
       p.sources.forEach(function (s) {
         h += '<a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(s.title || s.url) + '</a><br>';
       });
@@ -383,23 +477,33 @@
     // 仅移动端、且有有效坐标时才给入口。
     // href 直接指向网页版：JS 失效或被拦时仍可用，长按也能复制链接。
     if (IS_MOBILE && p.lng != null && p.lat != null) {
-      h += '<a class="amap-jump" href="' + esc(amapMarkerUri(p, false)) + '"'
+      h += '<a class="amap-jump" href="' + esc(amapWebUri(p)) + '"'
         + ' data-lng="' + p.lng + '" data-lat="' + p.lat + '"'
         + ' data-nm="' + esc(p.name || '') + '">'
         + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'
         + '<path d="M12 21s7-6.4 7-11a7 7 0 1 0-14 0c0 4.6 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>'
-        + '<span>在高德地图中查看</span></a>';
+        + '<span>在高德地图中打开</span></a>';
     }
-    return h + '</div>';
+    return h;
   }
 
-  // 点击：先用 callnative=1 尝试唤起 App，1.2s 内页面没进后台就兜底跳网页版。
-  // 无法 100% 判断是否唤起成功（Android 部分机型唤后台不触发 visibilitychange），
-  // 因此宁可多跳一次网页版，也不要「点了没反应」。
+  function infoHtml(p) {
+    return '<div class="amap-info-content">' + poiBodyHtml(p) + '</div>';
+  }
+
+  // 关闭卡片
+  function closeCard() {
+    var c = $('poi-card');
+    if (c) c.classList.remove('on');
+  }
+
+  // 点击：先尝试 App scheme 唤起；1.5s 内页面未进入后台（说明没唤起成功）再跳网页版。
+  // href 已是网页版地址，作为无障碍/长按复制/ JS 失效时的兜底。
   document.addEventListener('click', function (e) {
     var a = e.target && e.target.closest ? e.target.closest('.amap-jump') : null;
     if (!a) return;
     e.preventDefault();
+    e.stopPropagation();
 
     var p = {
       lng: a.getAttribute('data-lng'),
@@ -407,21 +511,36 @@
       name: a.getAttribute('data-nm') || ''
     };
     var webUrl = a.getAttribute('href');
-    var nativeUrl = amapMarkerUri(p, true);
-    var jumped = false;
+    var scheme = amapAppScheme(p);
 
+    if (!scheme) { window.location.href = webUrl; return; }
+
+    var jumped = false;
     function goWeb() {
       if (jumped) return;
       jumped = true;
       window.location.href = webUrl;
     }
 
-    try { window.location.href = nativeUrl; } catch (err) { goWeb(); return; }
+    // Android 上直接赋 location 可能弹「无法打开」错误页，用隐藏 iframe 更稳；
+    // iOS Safari 对 iframe 里的 scheme 有限制，改用 location 赋值。
+    var isIOS = /iPhone|iPad|iPod|iOS/i.test(navigator.userAgent || '');
+    try {
+      if (isIOS) {
+        window.location.href = scheme;
+      } else {
+        var fr = document.createElement('iframe');
+        fr.style.cssText = 'display:none;width:0;height:0;border:0';
+        fr.src = scheme;
+        document.body.appendChild(fr);
+        setTimeout(function () { if (fr.parentNode) fr.parentNode.removeChild(fr); }, 900);
+      }
+    } catch (err) { goWeb(); return; }
 
     setTimeout(function () {
       if (document.hidden || document.visibilityState === 'hidden') return;
       goWeb();
-    }, 1200);
+    }, 1500);
   });
 
   // ---------- 标签排布（碰撞检测） ----------
@@ -590,7 +709,7 @@
         fillColor: t.color, fillOpacity: 1,
         zIndex: 20, cursor: 'pointer'
       });
-      mk.on('click', function () { infoWin.setContent(infoHtml(p)); infoWin.open(map, [p.lng, p.lat]); });
+      mk.on('click', function () { openInfoWindow(p); });
       baseOverlays.push(mk);
     });
 
@@ -655,9 +774,24 @@
       mapStyle: CFG.mapStyle || 'amap://styles/whitesmoke',
       center: [ALL[0].lng, ALL[0].lat]
     });
-    infoWin = new AMap.InfoWindow({ offset: new AMap.Pixel(0, -10) });
+    infoWin = new AMap.InfoWindow({ offset: new AMap.Pixel(0, -12), autoMove: false });
     map.on('moveend', function () { scheduleLabels(); });
     map.on('zoomend', function () { scheduleLabels(); });
+
+    // 详情卡片：关闭按钮 + 点地图空白处收起
+    (function () {
+      var card = $('poi-card');
+      if (card) {
+        var closeBtn = card.querySelector('.pc-close');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            closeCard();
+          });
+        }
+      }
+      map.on('click', function () { closeCard(); });
+    })();
 
     // 手机端底部抽屉：点把手折叠/展开，折叠后地图铺满
     var handle = $('sheet-handle');
