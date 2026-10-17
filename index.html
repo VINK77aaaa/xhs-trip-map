@@ -51,33 +51,38 @@
     #app > div:first-child { flex: 1 1 auto; min-height: 0; }
     #panel {
       order: 2; width: 100%; flex: 0 0 auto;
-      max-height: 58dvh;
+      max-height: 56dvh;
       border-left: none; border-top: 1px solid #e8edf3;
-      border-radius: 16px 16px 0 0;
+      border-radius: 14px 14px 0 0;
       box-shadow: 0 -6px 22px rgba(20, 30, 50, .09);
-      padding: 0 16px calc(20px + env(safe-area-inset-bottom));
+      padding: 0 14px calc(16px + env(safe-area-inset-bottom));
       transition: max-height .22s ease;
       -webkit-overflow-scrolling: touch;
     }
-    #panel.collapsed { max-height: 46px; overflow: hidden; }
+    #panel.collapsed { max-height: 40px; overflow: hidden; }
     .sheet-handle {
       display: flex; align-items: center; justify-content: center;
-      height: 46px; margin: 0 -16px 2px; cursor: pointer; touch-action: manipulation;
+      height: 38px; margin: 0 -14px 0; cursor: pointer; touch-action: manipulation;
     }
-    .sheet-handle span { width: 38px; height: 4px; border-radius: 2px; background: #d5dce6; }
-    #panel h1 { font-size: 15px; }
-    #panel .sub { margin-bottom: 14px; }
-    .group { margin-bottom: 15px; }
-    .chip { padding: 8px 13px; font-size: 12.5px; }
-    .chip .dot { width: 8px; height: 8px; flex-basis: 8px; }
-    .sw { padding: 7px 0; font-size: 13.5px; margin-bottom: 0; }
-    .sw input { width: 17px; height: 17px; }
-    .stop { padding: 9px 5px; }
-    .stop .idx { width: 17px; height: 17px; flex-basis: 17px; font-size: 10px; }
-    .stop .nm { font-size: 13px; }
-    .leg { padding-left: 30px; font-size: 11px; }
-    #fallback { padding: 16px; }
-    #banner { position: fixed; padding: 8px 13px; font-size: 12px; }
+    .sheet-handle span { width: 34px; height: 3.5px; border-radius: 2px; background: #d5dce6; }
+    #panel h1 { font-size: 14.5px; margin-bottom: 2px; }
+    #panel .sub { font-size: 11px; margin-bottom: 9px; line-height: 1.45; }
+    .group { margin-bottom: 11px; }
+    .group-title { font-size: 10px; margin-bottom: 5px; letter-spacing: .06em; }
+    .chips { gap: 4px; }
+    .chip { padding: 5px 10px; font-size: 12px; }
+    .chip .dot { width: 7px; height: 7px; flex-basis: 7px; }
+    .day-block { margin-bottom: 10px; }
+    .day-head { margin-bottom: 4px; font-size: 11px; }
+    .stop { padding: 6px 4px; }
+    .stop .idx { width: 15px; height: 15px; flex-basis: 15px; }
+    .stop .nm { font-size: 12.5px; }
+    .leg { padding: 0 0 0 26px; font-size: 10.5px; }
+    .sw { padding: 5px 0; font-size: 12.5px; margin-bottom: 0; }
+    .sw input { width: 16px; height: 16px; }
+    .hint { font-size: 11px; line-height: 1.6; }
+    #fallback { padding: 14px; }
+    #banner { position: fixed; padding: 7px 12px; font-size: 11.5px; }
   }
   #banner {
     position: absolute; top: 0; left: 0; right: 0; z-index: 999;
@@ -607,6 +612,14 @@
       var q = new URLSearchParams(location.search);
       var d = q.get('day');
       if (d && d !== 'all') { state.day = Number(d); buildChips(); }
+      else if (!d && window.innerWidth <= 760) {
+        // 手机屏窄，一次装下全部行程会让 fitView 取到很低的缩放，底图发虚。
+        // 默认聚焦第一天，用户仍可点「全部」看全览。
+        var ds = [];
+        routes.forEach(function (r) { var n = Number(r.day); if (ds.indexOf(n) < 0) ds.push(n); });
+        ds.sort(function (a, b) { return a - b; });
+        if (ds.length) { state.day = ds[0]; buildChips(); }
+      }
       var t = q.get('type');
       if (t) {
         Object.keys(state.types).forEach(function (k) { state.types[k] = t.split(',').indexOf(k) >= 0; });
