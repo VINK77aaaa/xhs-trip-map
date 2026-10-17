@@ -95,11 +95,23 @@
   #fallback table { border-collapse: collapse; width: 100%; font-size: 12.5px; margin-bottom: 26px; }
   #fallback th, #fallback td { border: 1px solid #e8edf3; padding: 7px 10px; text-align: left; }
   #fallback th { background: #f7f9fc; color: #6b7891; font-weight: 600; }
-  .amap-info-content { font-size: 12.5px; line-height: 1.7; }
+  .amap-info-content { font-size: 12.5px; line-height: 1.7; min-width: 170px; }
   .amap-info-content .nm { font-weight: 600; font-size: 14px; margin-bottom: 4px; color: #17202f; }
   .amap-info-content .meta { color: #8b96a8; font-size: 11.5px; }
   .amap-info-content a { color: #2f6fed; text-decoration: none; }
   .amap-info-content a:hover { text-decoration: underline; }
+
+  /* 「在高德地图中查看」——仅移动端渲染，故不需要媒体查询控制显隐。
+     信息窗宽度按内容自适应，必须 nowrap，否则按钮会被挤成多行窄条。 */
+  .amap-info-content .amap-jump {
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+    margin-top: 9px; padding: 8px 12px; border-radius: 8px;
+    background: #2f6fed; color: #fff !important; font-size: 13px; font-weight: 600;
+    text-decoration: none !important; line-height: 1.2; white-space: nowrap;
+  }
+  .amap-info-content .amap-jump:active { background: #2358c4; }
+  .amap-info-content .amap-jump svg { width: 13px; height: 13px; flex: 0 0 13px; }
+  .amap-info-content .amap-jump span { white-space: nowrap; flex: 0 0 auto; }
 </style>
 </head>
 <body>
@@ -178,6 +190,25 @@
   var baseOverlays = [];
   var labelOverlays = [];
   var labelTimer = null;
+
+  // 是否移动端：触屏 + 窄屏 + 移动 UA，三者都满足才算。
+  // 只看 UA 会在平板/折叠屏上判错，只看宽度会在桌面缩小窗口时判错。
+  var IS_MOBILE = (function () {
+    var ua = navigator.userAgent || '';
+    var touch = ('ontouchstart' in window) || (navigator.maxTouchPoints || 0) > 0;
+    var narrow = Math.min(window.innerWidth, window.screen ? window.screen.width : 9999) <= 900;
+    return touch && narrow && /Android|iPhone|iPad|iPod|HarmonyOS|Mobile/i.test(ua);
+  })();
+
+  // 高德单点标注 URI。坐标为 GCJ-02，与 coordinate=gaode 对应，无需转换。
+  function amapMarkerUri(p, callnative) {
+    return 'https://uri.amap.com/marker'
+      + '?position=' + p.lng + ',' + p.lat
+      + '&name=' + encodeURIComponent(p.name || '')
+      + '&coordinate=gaode'
+      + '&src=' + encodeURIComponent('xhs-trip-map')
+      + '&callnative=' + (callnative ? 1 : 0);
+  }
 
   $('subline').textContent =
     [(meta.destination || ''), (meta.days ? meta.days + ' 天' : ''), (meta.mode || '')].filter(Boolean).join(' · ') +
@@ -349,8 +380,49 @@
       });
       h += '</div>';
     }
+    // 仅移动端、且有有效坐标时才给入口。
+    // href 直接指向网页版：JS 失效或被拦时仍可用，长按也能复制链接。
+    if (IS_MOBILE && p.lng != null && p.lat != null) {
+      h += '<a class="amap-jump" href="' + esc(amapMarkerUri(p, false)) + '"'
+        + ' data-lng="' + p.lng + '" data-lat="' + p.lat + '"'
+        + ' data-nm="' + esc(p.name || '') + '">'
+        + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'
+        + '<path d="M12 21s7-6.4 7-11a7 7 0 1 0-14 0c0 4.6 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>'
+        + '<span>在高德地图中查看</span></a>';
+    }
     return h + '</div>';
   }
+
+  // 点击：先用 callnative=1 尝试唤起 App，1.2s 内页面没进后台就兜底跳网页版。
+  // 无法 100% 判断是否唤起成功（Android 部分机型唤后台不触发 visibilitychange），
+  // 因此宁可多跳一次网页版，也不要「点了没反应」。
+  document.addEventListener('click', function (e) {
+    var a = e.target && e.target.closest ? e.target.closest('.amap-jump') : null;
+    if (!a) return;
+    e.preventDefault();
+
+    var p = {
+      lng: a.getAttribute('data-lng'),
+      lat: a.getAttribute('data-lat'),
+      name: a.getAttribute('data-nm') || ''
+    };
+    var webUrl = a.getAttribute('href');
+    var nativeUrl = amapMarkerUri(p, true);
+    var jumped = false;
+
+    function goWeb() {
+      if (jumped) return;
+      jumped = true;
+      window.location.href = webUrl;
+    }
+
+    try { window.location.href = nativeUrl; } catch (err) { goWeb(); return; }
+
+    setTimeout(function () {
+      if (document.hidden || document.visibilityState === 'hidden') return;
+      goWeb();
+    }, 1200);
+  });
 
   // ---------- 标签排布（碰撞检测） ----------
   function clearLabels() {
